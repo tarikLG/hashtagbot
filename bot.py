@@ -22,12 +22,19 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_secret)
 api = tweepy.API(auth)
 
+print("[+] Connected to API")
+
 # search for tweets under hashtags
 
+print("[/] Retrieving tweets...")
+
 if latest_tweet != "placeholder":
-    tweets = [tweet for tweet in tweepy.Cursor(api.search_tweets, q="#Hedera", result_type="recent", since_id=int(latest_tweet)).items(100)]
+    for term in config["PHRASES"]["terms"].split(", "):
+        tweets += [tweet for tweet in tweepy.Cursor(api.search_tweets, q=term, result_type="recent", since_id=int(latest_tweet)).items(100)]
 else:
-    tweets = [tweet for tweet in tweepy.Cursor(api.search_tweets, q="#Hedera", result_type="recent").items(100)]
+    for term in config["PHRASES"]["terms"].split(", "):
+        tweets += [tweet for tweet in tweepy.Cursor(api.search_tweets, q=term, result_type="recent").items(100)]
+print("[+] tweets recieved")
 
 # write the last tweet so it doesn't reply to the same thing twice
 
@@ -45,8 +52,10 @@ src = os.path.join((os.path.join(os.getcwd(), "src")), random.choice(listdir("sr
 # pick a phrase and reply to tweets with media
 
 for tweet in tweets:
+    print("[/] Tweeting...")
     media = api.media_upload(filename=src)
     phrase = random.choice(config["PHRASES"]["phrases"].split(", "))
     api.update_status(status = phrase, in_reply_to_status_id = str(tweet.id), auto_populate_reply_metadata=True, media_ids=[media.media_id])
+    print("[+] Tweeted and waiting 10 minutes")
     time.sleep(6000)
 
