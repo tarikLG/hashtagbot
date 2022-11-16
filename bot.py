@@ -28,6 +28,8 @@ print("[+] Connected to API")
 
 print("[/] Retrieving tweets...")
 
+tweets = []
+
 if latest_tweet != "placeholder":
     for term in config["PHRASES"]["terms"].split(", "):
         tweets += [tweet for tweet in tweepy.Cursor(api.search_tweets, q=term, result_type="recent", since_id=int(latest_tweet)).items(100)]
